@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+  --bg:        #070b13;
+  --surf:      #0d1422;
+  --surf2:     #111b2e;
+  --border:    #1c2d46;
+  --border2:   #243550;
+  --gold:      #c89a3e;
+  --gold-b:    #e0b050;
+  --gold-dim:  rgba(200, 154, 62, .10);
+  --teal:      #2ec4b6;
+  --teal-dim:  rgba(46, 196, 182, .07);
+  --text:      #d8e2f0;
+  --dim:       #5a7090;
+  --muted:     #3a4a60;
+  --green:     #4caf88;
+  --red:       #e05c5c;
+
+  --font-display: 'Cormorant Garamond', 'Garamond', Georgia, serif;
+  --font-ui:      'Syne', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── App shell ──────────────────────────────────────────────────────────── */
+.lds-app {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  grid-template-columns: 272px 1fr 284px;
+  grid-template-areas: "hd hd hd" "sb mp mt";
+  background: var(--bg);
+  font-family: var(--font-ui);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.lds-header {
+  grid-area: hd;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  gap: 10px;
+}
+.lds-logo {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--gold-b);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.lds-divider  { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+.lds-tagline  { font-size: 9.5px; font-weight: 500; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.lds-hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.lds-badge    { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--dim); font-family: var(--font-mono); letter-spacing: .04em; }
+.lds-dot      { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green); }
+.lds-dot.off  { background: var(--muted); box-shadow: none; }
+.lds-btn-upload {
+  background: var(--gold);
+  color: #060a10;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: none;
+  padding: 7px 16px;
+  cursor: pointer;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  transition: background .15s;
+}
+.lds-btn-upload:hover { background: var(--gold-b); }
+
+/* ─── Sidebar ────────────────────────────────────────────────────────────── */
+.lds-sidebar {
+  grid-area: sb;
+  background: var(--surf);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.lds-sidebar::-webkit-scrollbar       { width: 3px; }
+.lds-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.lds-section       { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.lds-section-label { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 11px; }
+
+/* Upload zone */
+.lds-upload-zone {
+  border: 1px dashed var(--border2);
+  padding: 18px 12px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surf2);
+  transition: border-color .2s, background .2s;
+}
+.lds-upload-zone:hover,
+.lds-upload-zone.dragging { border-color: var(--gold); background: var(--gold-dim); }
+.lds-upload-title { font-size: 11px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+.lds-upload-sub   { font-size: 10px; color: var(--dim); line-height: 1.5; }
+
+/* Loaded file row */
+.lds-loaded-file {
+  background: var(--teal-dim);
+  border: 1px solid rgba(46, 196, 182, .22);
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lds-file-name  { color: var(--teal); font-family: var(--font-mono); font-size: 10px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lds-file-meta  { color: var(--dim); font-family: var(--font-mono); font-size: 10px; flex-shrink: 0; }
+.lds-clear-btn  { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 1px 3px; line-height: 1; transition: color .15s; }
+.lds-clear-btn:hover { color: var(--red); }
+
+/* Mode toggle */
+.lds-mode-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.lds-mode-btn {
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  padding: 7px 4px;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.lds-mode-btn:hover  { border-color: var(--border2); color: var(--text); }
+.lds-mode-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-b); }
+
+/* Filter controls */
+.lds-filter-row  { margin-bottom: 11px; }
+.lds-filter-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-bottom: 5px; letter-spacing: .03em; }
+.lds-filter-val  { font-family: var(--font-mono); color: var(--gold); font-size: 10px; }
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: var(--border2);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+  background: var(--gold);
+  cursor: pointer;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Toggle */
+.lds-toggle-row  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; font-size: 11px; color: var(--dim); }
+.lds-toggle      { width: 26px; height: 14px; background: var(--surf2); border: 1px solid var(--border2); border-radius: 7px; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+.lds-toggle.on   { background: rgba(200, 154, 62, .25); border-color: var(--gold); }
+.lds-toggle::after { content: ''; position: absolute; width: 8px; height: 8px; background: var(--muted); border-radius: 50%; top: 2px; left: 2px; transition: all .2s; }
+.lds-toggle.on::after { left: 14px; background: var(--gold); }
+
+/* CoG sidebar note */
+.lds-cog-note      { margin-top: 10px; font-size: 10px; color: var(--muted); line-height: 1.6; }
+.lds-cog-note span { color: var(--teal); font-family: var(--font-mono); font-size: 10px; }
+
+/* ─── Map panel ──────────────────────────────────────────────────────────── */
+.lds-map { grid-area: mp; position: relative; overflow: hidden; background: var(--bg); }
+
+.lds-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 11, 19, .75);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.lds-empty-title { font-family: var(--font-display); font-size: 26px; color: var(--gold-b); letter-spacing: .12em; text-transform: uppercase; margin-top: 14px; }
+.lds-empty-sub   { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 7px; }
+
+/* ─── Metrics panel ──────────────────────────────────────────────────────── */
+.lds-metrics {
+  grid-area: mt;
+  background: var(--surf);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.lds-metrics::-webkit-scrollbar       { width: 3px; }
+.lds-metrics::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.lds-stat-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lds-stat-card  { background: var(--surf2); border: 1px solid var(--border); padding: 11px 12px; }
+.lds-stat-label { font-size: 9px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
+.lds-stat-value { font-family: var(--font-mono); font-size: 19px; color: var(--text); font-weight: 500; line-height: 1; }
+.lds-stat-value.sm   { font-size: 15px; }
+.lds-stat-value.gold { color: var(--gold-b); }
+.lds-stat-value.teal { color: var(--teal); }
+.lds-stat-unit  { font-size: 9px; color: var(--dim); margin-top: 3px; }
+
+.lds-cog-card    { background: rgba(200, 154, 62, .08); border: 1px solid rgba(200, 154, 62, .25); padding: 13px; }
+.lds-cog-title   { font-size: 9px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 9px; display: flex; align-items: center; gap: 6px; }
+.lds-cog-coords  { font-family: var(--font-mono); font-size: 14px; color: var(--gold-b); margin-bottom: 3px; }
+.lds-cog-address { font-size: 10px; color: var(--dim); }
+.lds-cog-method  { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 8px; letter-spacing: .03em; }
+.lds-empty-lanes { font-size: 10px; color: var(--muted); padding: 8px 0; }
+
+.lds-lane-row    { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.lds-lane-row:last-child { border-bottom: none; }
+.lds-lane-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.lds-lane-pair   { color: var(--text); font-family: var(--font-mono); font-size: 10px; font-weight: 500; }
+.lds-lane-cost   { color: var(--dim); font-family: var(--font-mono); font-size: 10px; }
+.lds-util-bar    { height: 2px; background: var(--border2); border-radius: 1px; overflow: hidden; }
+.lds-util-fill   { height: 100%; border-radius: 1px; background: var(--teal); transition: width .4s ease; }
+.lds-util-fill.high { background: var(--gold); }
+.lds-util-fill.crit { background: var(--red); }
+.lds-lane-meta   { display: flex; justify-content: space-between; margin-top: 3px; font-size: 9px; color: var(--muted); font-family: var(--font-mono); }
