@@ -4,6 +4,7 @@ import Sidebar     from "./components/Sidebar";
 import MapPanel    from "./components/MapPanel";
 import MetricsPanel from "./components/MetricsPanel";
 import "./styles/lodestone.css";
+import './lib/csv';
 
 /**
  * Root layout. All useState here is placeholder until you wire in Zustand.

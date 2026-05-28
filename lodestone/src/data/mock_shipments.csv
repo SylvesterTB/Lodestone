@@ -1,0 +1,4 @@
+FROM_LAT,from_lon,Destination Lat,to_lon,QTY,freight_cost,ship_from,destination
+35.7796,-78.6382,33.7490,-84.3880,1200,4500.50,Raleigh,Atlanta
+33.7490,-84.3880,41.8781,-87.6298,850,3200.00,Atlanta,Chicago
+41.8781,-87.6298,34.0522,-118.2437,2100,8900.75,Chicago,Los Angeles
