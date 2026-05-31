@@ -1,6 +1,5 @@
 import Papa from 'papaparse';
-import mockCsvString from '../data/mock_shipments.csv?raw';
-import Fuse from 'fuse.js';
+import Fuse from 'fuse.js'
 
 
 export interface ParsedShipment {
@@ -15,7 +14,7 @@ export interface ParsedShipment {
 }
 
 export function parseAndNormalizeCSV(csvContent: string): ParsedShipment[] {
-  const parsed = Papa.parse(csvContent, {
+  const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true, 
     skipEmptyLines: true
   });
@@ -28,8 +27,8 @@ export function parseAndNormalizeCSV(csvContent: string): ParsedShipment[] {
 
   // only need to check for lower case
   const explicitDictionary: Record<keyof ParsedShipment, string[]> = {
-    origin_lat: ['from_lat', 'from_latitude', 'origin_lat', 'source_lat'],
-    origin_lon: ['from_lon', 'from_longitude', 'origin_lon', 'source_lon'],
+    origin_lat: ['from_lat', 'from_latitude', 'origin_lat', 'source_lat', 'ship_from_lat'],
+    origin_lon: ['from_lon', 'from_longitude', 'origin_lon', 'source_lon', 'ship_from_lon'],
     dest_lat: ['destination lat', 'destination_lat', 'destination_latitude', 'to_lat', 'dest_lat'],
     dest_lon: ['to_lon', 'destination_lon', 'destination_longitude', 'dest_lon'],
     volume: ['qty', 'quantity', 'volume', 'shipments', 'units'],
@@ -37,16 +36,27 @@ export function parseAndNormalizeCSV(csvContent: string): ParsedShipment[] {
     origin_label: ['ship_from', 'origin_label', 'from_city', 'origin'],
     dest_label: ['destination', 'dest_label', 'to_city', 'to_label']
   };
+  const options = {
+    threshold: .4
+  }
+  const fuse = new Fuse(headers, options);
 
   function findBestHeader(canonicalTarget: keyof ParsedShipment): string {
     const targets = explicitDictionary[canonicalTarget];
-    
+
     const matchedLowercaseHeader = headers.find(h => targets.includes(h));
     
     if (matchedLowercaseHeader) {
       return rawHeaders.find(h => h.toLowerCase().trim() === matchedLowercaseHeader) || canonicalTarget;
     }
-    
+    // last check to see if any close matches
+    for (const alias of targets) {
+      const results = fuse.search(alias);
+      if (results.length > 0) {
+        return rawHeaders.find(h => h.toLowerCase().trim() === results[0].item) || canonicalTarget;
+      }
+  }
+  
     return canonicalTarget; 
   }
 
@@ -63,28 +73,32 @@ export function parseAndNormalizeCSV(csvContent: string): ParsedShipment[] {
 
   console.log("Calculated Header Map:", headerMap);
 
-  const cleanShipments: ParsedShipment[] = rawRows.map((row: any) => {
+  const cleanShipments: ParsedShipment[] = rawRows.map((row) => {
     return {
       origin_lat: Number(row[headerMap.origin_lat]),
       origin_lon: Number(row[headerMap.origin_lon]),
       dest_lat: Number(row[headerMap.dest_lat]),
       dest_lon: Number(row[headerMap.dest_lon]),
-      volume: Number(row[headerMap.volume]) || 0,
-      cost: Number(row[headerMap.cost]) || 0,
+      volume: Number(row[headerMap.volume]),
+      cost: Number(row[headerMap.cost]),
       origin_label: row[headerMap.origin_label] || 'Unknown',
       dest_label: row[headerMap.dest_label] || 'Unknown'
     };
   });
 
-  const validShipments = cleanShipments.filter(s => 
-    !isNaN(s.origin_lat) && !isNaN(s.origin_lon) && !isNaN(s.dest_lat) && !isNaN(s.dest_lon)
-  );
+  const validShipments = cleanShipments.filter(s => {
+    const coordsValid  = !isNaN(s.origin_lat) && !isNaN(s.origin_lon)
+                      && !isNaN(s.dest_lat)   && !isNaN(s.dest_lon);
+    const metricsValid = !isNaN(s.volume) && !isNaN(s.cost);
+    return coordsValid && metricsValid;
+  });
 
   return validShipments;
 }
 
 if (import.meta.env.DEV) {
+  const { default: mockCsv } = await import('../data/mock_shipments.csv?raw');
   console.log("🧪 Running CSV Parser Test...");
-  const result = parseAndNormalizeCSV(mockCsvString);
+  const result = parseAndNormalizeCSV(mockCsv);
   console.log("📋 Normalized Output Result:", result);
 }
