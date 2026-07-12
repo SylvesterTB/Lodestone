@@ -11,7 +11,7 @@ interface FilterState{
   useWeiszfeld:  boolean
 }
 
-interface LodestoneStore extends FilterState {
+export interface LodestoneStore extends FilterState {
   // ── rawData ──────────────────────────────────────
   shipments:     ParsedShipment[]
   filename:      string | null
