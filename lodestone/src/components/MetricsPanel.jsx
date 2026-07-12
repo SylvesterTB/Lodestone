@@ -103,7 +103,7 @@ function LaneRow({ lane }) {
       </div>
       <div className="lds-lane-meta">
         <span>{lane.totalVol.toLocaleString()} units</span>
-        <span>{lane.utilPct}% util</span>
+        <span>{Math.round(lane.utilPct)}% util</span>
       </div>
     </div>
   );
