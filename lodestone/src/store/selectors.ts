@@ -1,9 +1,10 @@
 import { LodestoneStore } from './useStore'
 import { AggregatedLane, NetworkMetrics } from '../types'
+import { ParsedShipment } from '../lib/csv';
 
 
-export function selectFilteredLanes(s: LodestoneStore): AggregatedLane[] {
-    const filtered = s.shipments.filter(row => row.volume >= s.minVol);
+export function selectFilteredLanes(shipments: ParsedShipment[], minVol: number): AggregatedLane[] {
+    const filtered = shipments.filter(row => row.volume >= minVol);
     const lanesMap: Record<string, AggregatedLane> = {};
 
     for (const shipment of filtered) {
@@ -38,8 +39,8 @@ export function selectFilteredLanes(s: LodestoneStore): AggregatedLane[] {
     return Object.values(lanesMap);
 }
 
-export function selectNetworkMetrics(s: LodestoneStore): NetworkMetrics | null {
-  const lanes = selectFilteredLanes(s);
+export function selectNetworkMetrics(shipments: ParsedShipment[], minVol: number): NetworkMetrics | null {
+  const lanes = selectFilteredLanes(shipments, minVol);
   if (lanes.length === 0) return null;
   const lanesTotal = {
     totalCost: 0,

@@ -1,64 +1,64 @@
-import { useState } from "react";
 import Header      from "./components/Header";
 import Sidebar     from "./components/Sidebar";
 import MapPanel    from "./components/MapPanel";
 import MetricsPanel from "./components/MetricsPanel";
 import "./styles/lodestone.css";
-import './lib/csv';
+import { useLodestoneStore } from './store/useStore'
+import { selectNetworkMetrics, selectFilteredLanes, selectCogResult } from './store/selectors'
+import { parseAndNormalizeCSV } from './lib/csv'
+import { useMemo } from 'react'
 
-/**
- * Root layout. All useState here is placeholder until you wire in Zustand.
- *
- * Migration path:
- *   1. Create store/useStore.ts with rawData / filterState / viewState slices
- *   2. Create store/selectors.ts for filteredLanes, cogResult, metrics
- *   3. Replace useState blocks below with the relevant store hooks
- *   4. Move handleFileLoad / handleFileClear into store actions
- */
+
+
+
+
 export default function App() {
 
   // ── View state (→ viewState slice) ─────────────────────────────────────
-  const [mode, setMode] = useState("lanes"); // 'lanes' | 'cog' | 'both'
+  const mode    = useLodestoneStore(s => s.mode)// 'lanes' | 'cog' | 'both'
+  const setMode = useLodestoneStore(s => s.setMode)
+
 
   // ── Raw data state (→ rawData slice) ───────────────────────────────────
-  const [filename, setFilename] = useState(null);
-  const [rowCount,  setRowCount]  = useState(0);
+  const filename      = useLodestoneStore(s => s.filename)
+  const rowCount      = useLodestoneStore(s => s.rowCount)
+  const parseWarnings = useLodestoneStore(s => s.parseWarnings)
+  const parseErrors   = useLodestoneStore(s => s.parseErrors)
+  const loadFile      = useLodestoneStore(s => s.loadFile)
+  const clearData     = useLodestoneStore(s => s.clearData)
 
   // ── Filter state (→ filterState slice) ─────────────────────────────────
-  const [minVol,        setMinVol]        = useState(0);
-  const [scaleWidth,    setScaleWidth]    = useState(true);
-  const [showLabels,    setShowLabels]    = useState(true);
-  const [highlightUtil, setHighlightUtil] = useState(false);
-  const [weightByCost,  setWeightByCost]  = useState(true);
-  const [useWeiszfeld,  setUseWeiszfeld]  = useState(true);
+  const shipments = useLodestoneStore(s => s.shipments)
+  const minVol    = useLodestoneStore(s => s.minVol)
+  const scaleWidth    = useLodestoneStore(s => s.scaleWidth)
+  const showLabels    = useLodestoneStore(s => s.showLabels)
+  const highlightUtil = useLodestoneStore(s => s.highlightUtil)
+  const weightByCost  = useLodestoneStore(s => s.weightByCost)
+  const useWeiszfeld  = useLodestoneStore(s => s.useWeiszfeld)
+  const setFilter     = useLodestoneStore(s => s.setFilter)
 
   // ── Derived (→ selectors.ts) ────────────────────────────────────────────
   // Replace these nulls with values from your computed selectors:
   //   const metrics   = useMetrics();
   //   const cogResult = useCogResult();
   //   const lanes     = useFilteredLanes(); // sorted by totalCost desc
-  const metrics   = null;
-  const cogResult = null;
-  const lanes     = [];
+  const lanes   = useMemo(() => selectFilteredLanes(shipments, minVol), [shipments, minVol])
+  const metrics = useMemo(() => selectNetworkMetrics(shipments, minVol), [shipments, minVol])
+  const cogResult = useLodestoneStore(selectCogResult);
   const cogIters  = cogResult?.iters ?? null;
 
   const hasData = filename !== null;
   const showCog = mode === "cog" || mode === "both";
 
   // ── Handlers ────────────────────────────────────────────────────────────
-  function handleFileLoad(file) {
-    // TODO:
-    //   1. Parse with PapaParse in a Web Worker (lib/csv.ts)
-    //   2. Normalize column names (fuzzy match)
-    //   3. Dispatch parsed rows to rawData store
-    setFilename(file.name);
-    setRowCount(0); // update once parse resolves
+  async function handleFileLoad(file) {
+    const text = await file.text()
+    const result = parseAndNormalizeCSV(text)
+    loadFile(file.name, result)
   }
 
   function handleFileClear() {
-    // TODO: dispatch clearRawData action to store
-    setFilename(null);
-    setRowCount(0);
+    clearData()
   }
 
   function handleUploadClick() {
@@ -80,17 +80,17 @@ export default function App() {
         mode={mode}
         onModeChange={setMode}
         minVol={minVol}
-        onMinVolChange={setMinVol}
+        onMinVolChange={(v) => setFilter('minVol', v)}
         scaleWidth={scaleWidth}
-        onScaleWidthChange={setScaleWidth}
+        onScaleWidthChange={(v) => setFilter('scaleWidth', v)}
         showLabels={showLabels}
-        onShowLabelsChange={setShowLabels}
+        onShowLabelsChange={(v) => setFilter('showLabels', v)}
         highlightUtil={highlightUtil}
-        onHighlightUtilChange={setHighlightUtil}
+        onHighlightUtilChange={(v) => setFilter('highlightUtil', v)}
         weightByCost={weightByCost}
-        onWeightByCostChange={setWeightByCost}
+        onWeightByCostChange={(v) => setFilter('weightByCost', v)}
         useWeiszfeld={useWeiszfeld}
-        onUseWeiszfeldChange={setUseWeiszfeld}
+        onUseWeiszfeldChange={(v) => setFilter('useWeiszfeld', v)}
         cogIters={cogIters}
         onFileLoad={handleFileLoad}
         onFileClear={handleFileClear}
