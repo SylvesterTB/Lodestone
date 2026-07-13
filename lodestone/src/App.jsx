@@ -7,6 +7,8 @@ import { useLodestoneStore } from './store/useStore'
 import { selectNetworkMetrics, selectFilteredLanes, selectCogResult } from './store/selectors'
 import { parseAndNormalizeCSV } from './lib/csv'
 import { useMemo } from 'react'
+import 'leaflet/dist/leaflet.css'
+import './styles/lodestone.css'
 
 
 
@@ -96,25 +98,7 @@ export default function App() {
         onFileClear={handleFileClear}
       />
 
-      <MapPanel hasData={hasData}>
-        {/*
-          TODO: replace this comment with your Leaflet map.
-
-          Example structure once react-leaflet is installed:
-
-            <MapContainer
-              center={[39.5, -98.35]}
-              zoom={4}
-              style={{ height: "100%", width: "100%" }}
-              zoomControl={false}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <LaneLayer lanes={lanes} scaleWidth={scaleWidth} highlightUtil={highlightUtil} />
-              <NodeLayer lanes={lanes} showLabels={showLabels} />
-              {showCog && cogResult && <CogMarker position={[cogResult.lat, cogResult.lon]} />}
-            </MapContainer>
-        */}
-      </MapPanel>
+    <MapPanel hasData={hasData} />
 
       <MetricsPanel
         metrics={metrics}

@@ -176,7 +176,15 @@ input[type="range"]::-webkit-slider-thumb {
 .lds-cog-note span { color: var(--teal); font-family: var(--font-mono); font-size: 10px; }
 
 /* ─── Map panel ──────────────────────────────────────────────────────────── */
-.lds-map { grid-area: mp; position: relative; overflow: hidden; background: var(--bg); }
+.lds-map { 
+  grid-area: mp; 
+  position: relative; 
+  overflow: hidden; 
+  background: var(--bg);
+  height: 100%;        /* add this */
+  min-height: 0;
+
+}
 
 .lds-empty-state {
   position: absolute;
@@ -185,9 +193,12 @@ input[type="range"]::-webkit-slider-thumb {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(7, 11, 19, .75);
-  backdrop-filter: blur(2px);
+  background: rgba(7, 11, 19, 0.6); 
+  backdrop-filter: blur(3px) brightness(0.5);
   pointer-events: none;
+  z-index: 1000;
+  transition: opacity 0.4s ease;
+
 }
 .lds-empty-title { font-family: var(--font-display); font-size: 26px; color: var(--gold-b); letter-spacing: .12em; text-transform: uppercase; margin-top: 14px; }
 .lds-empty-sub   { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 7px; }
@@ -230,3 +241,4 @@ input[type="range"]::-webkit-slider-thumb {
 .lds-util-fill.high { background: var(--gold); }
 .lds-util-fill.crit { background: var(--red); }
 .lds-lane-meta   { display: flex; justify-content: space-between; margin-top: 3px; font-size: 9px; color: var(--muted); font-family: var(--font-mono); }
+
