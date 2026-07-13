@@ -1,6 +1,9 @@
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { useEffect } from 'react'
+import Map from 'react-map-gl/maplibre'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import LogoMark from './LogoMark'
+import { useEffect } from 'react'
+import { lodestoneMapStyle } from '../lib/mapStyle'
+
 
 function ResizeHandler() {
   const map = useMap()
@@ -13,18 +16,16 @@ function ResizeHandler() {
 export default function MapPanel({ hasData }) {
   return (
     <main className="lds-map">
-      <MapContainer
-        center={[39.5, -98.35]}
-        zoom={4}
-        style={{ height: "100%", width: "100%", background: "#070b13" }}
-        zoomControl={false}
+      <Map
+        initialViewState={{
+          longitude: -98.35,
+          latitude: 39.5,
+          zoom: 4
+        }}
+        style={{ width: "100%", height: "100%" }}
+        mapStyle={lodestoneMapStyle}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        />
-        <ResizeHandler />
-      </MapContainer>
+      </Map>
 
       {!hasData && (
         <div className="lds-empty-state">

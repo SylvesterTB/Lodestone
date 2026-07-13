@@ -7,7 +7,6 @@ import { useLodestoneStore } from './store/useStore'
 import { selectNetworkMetrics, selectFilteredLanes, selectCogResult } from './store/selectors'
 import { parseAndNormalizeCSV } from './lib/csv'
 import { useMemo } from 'react'
-import 'leaflet/dist/leaflet.css'
 import './styles/lodestone.css'
 
 
