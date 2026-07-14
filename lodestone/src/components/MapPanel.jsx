@@ -3,8 +3,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import LogoMark from './LogoMark'
 import { lodestoneMapStyle } from '../lib/mapStyle'
 import LaneLayer from './LaneLayer'
+import NodeLayer from './NodeLayer'
 
-export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil }) {
+
+export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, showLabels }) {
   return (
     <main className="lds-map">
       <Map
@@ -17,6 +19,7 @@ export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil }) 
         mapStyle={lodestoneMapStyle}
       >
         <LaneLayer lanes={lanes} scaleWidth={scaleWidth} highlightUtil={highlightUtil} />
+        <NodeLayer lanes={lanes} showLabels={showLabels} />
       </Map>
 
       {!hasData && (

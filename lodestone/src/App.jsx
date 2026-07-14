@@ -97,12 +97,13 @@ export default function App() {
         onFileClear={handleFileClear}
       />
 
-    <MapPanel
-      hasData={hasData}
-      lanes={lanes}
-      scaleWidth={scaleWidth}
-      highlightUtil={highlightUtil}
-    />
+      <MapPanel
+        hasData={hasData}
+        lanes={lanes}
+        scaleWidth={scaleWidth}
+        highlightUtil={highlightUtil}
+        showLabels={showLabels}
+      />
 
       <MetricsPanel
         metrics={metrics}
