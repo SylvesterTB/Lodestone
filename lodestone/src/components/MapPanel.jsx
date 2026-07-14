@@ -1,19 +1,10 @@
 import Map from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import LogoMark from './LogoMark'
-import { useEffect } from 'react'
 import { lodestoneMapStyle } from '../lib/mapStyle'
+import LaneLayer from './LaneLayer'
 
-
-function ResizeHandler() {
-  const map = useMap()
-  useEffect(() => {
-    map.invalidateSize()
-  }, [map])
-  return null
-}
-
-export default function MapPanel({ hasData }) {
+export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil }) {
   return (
     <main className="lds-map">
       <Map
@@ -25,6 +16,7 @@ export default function MapPanel({ hasData }) {
         style={{ width: "100%", height: "100%" }}
         mapStyle={lodestoneMapStyle}
       >
+        <LaneLayer lanes={lanes} scaleWidth={scaleWidth} highlightUtil={highlightUtil} />
       </Map>
 
       {!hasData && (

@@ -105,7 +105,7 @@ export const cogResult = (s: Store) =>
 |---|---|---|
 | `metrics` | `NetworkMetrics \| null` | `{ laneCount, nodeCount, totalCost, totalVol }` |
 | `cogResult` | `CogResult \| null` | `{ lat, lon, nearestCity, iters }` |
-| `lanes` | `AggregatedLane[]` | Pre-sorted by `totalCost` desc — `{ originLabel, destLabel, totalCost, totalVol, utilPct }` |
+| `lanes` | `AggregatedLane[]` | Pre-sorted by `totalCost` desc — `{ originLabel, destLabel, totalCost, totalVol, relativeVol }` |
 | `showCog` | `boolean` | Controls CoG card visibility |
 
 ---

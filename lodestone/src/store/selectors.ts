@@ -11,13 +11,17 @@ export function selectFilteredLanes(shipments: ParsedShipment[], minVol: number)
     const laneKey = `${shipment.origin_label}||${shipment.dest_label}`;    
     // if lane is not found already
     if (!lanesMap[laneKey]) {
-        lanesMap[laneKey] = {
+      lanesMap[laneKey] = {
         originLabel: shipment.origin_label ?? 'Unknown',
-        destLabel: shipment.dest_label ?? 'Unknown',
-        totalCost: shipment.cost,
-        totalVol: shipment.volume,
-        utilPct: 0 
-        };
+        destLabel:   shipment.dest_label   ?? 'Unknown',
+        originLat:   shipment.origin_lat,
+        originLon:   shipment.origin_lon,
+        destLat:     shipment.dest_lat,
+        destLon:     shipment.dest_lon,
+        totalCost:   shipment.cost,
+        totalVol:    shipment.volume,
+        relativeVol:     0
+      };
     }
     // for preexising lane
     else
@@ -33,7 +37,7 @@ export function selectFilteredLanes(shipments: ParsedShipment[], minVol: number)
         {
         for (const lane of Object.keys(lanesMap)) 
             {
-            lanesMap[lane].utilPct = (lanesMap[lane].totalVol / maxVol) * 100;
+            lanesMap[lane].relativeVol = (lanesMap[lane].totalVol / maxVol) * 100;
         }
     }
     return Object.values(lanesMap);

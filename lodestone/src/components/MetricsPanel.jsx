@@ -16,7 +16,7 @@
  * @property {string} destLabel
  * @property {number} totalCost
  * @property {number} totalVol
- * @property {number} utilPct     - 0–100
+ * @property {number} relativeVol     - 0–100
  */
 
 /**
@@ -91,7 +91,7 @@ function StatCard({ label, value, unit, valueClass = "" }) {
 }
 
 function LaneRow({ lane }) {
-  const utilClass = lane.utilPct > 85 ? "crit" : lane.utilPct > 70 ? "high" : "";
+  const utilClass = lane.relativeVol > 85 ? "crit" : lane.relativeVol > 70 ? "high" : "";
   return (
     <div className="lds-lane-row">
       <div className="lds-lane-header">
@@ -99,11 +99,11 @@ function LaneRow({ lane }) {
         <span className="lds-lane-cost">{formatCost(lane.totalCost)}</span>
       </div>
       <div className="lds-util-bar">
-        <div className={`lds-util-fill ${utilClass}`} style={{ width: `${lane.utilPct}%` }} />
+        <div className={`lds-util-fill ${utilClass}`} style={{ width: `${lane.relativeVol}%` }} />
       </div>
       <div className="lds-lane-meta">
         <span>{lane.totalVol.toLocaleString()} units</span>
-        <span>{Math.round(lane.utilPct)}% util</span>
+        <span>{Math.round(lane.relativeVol)}% util</span>
       </div>
     </div>
   );
