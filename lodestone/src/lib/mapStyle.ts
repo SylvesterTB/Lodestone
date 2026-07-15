@@ -8,7 +8,7 @@ const C = {
   landuse:      '#0f1826',
   waterway:     '#070b13',
   borderCountry:'#c89a3e',
-  borderState:  '#1c2d46',
+  borderState:  '#c89a3e',
   roadMinor:    '#111b2e',
   roadMajor:    '#162035',
   roadHighway:  '#1c2d46',
