@@ -8,7 +8,11 @@ import CogMarker from './CogMarker'
 
 
 
-export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, showLabels, cogResult, showCog  }) {
+export default function MapPanel({ 
+  hasData, lanes, scaleWidth, highlightUtil, 
+  showLabels, cogResult, showCog,
+  parseWarnings, parseErrors
+}) {
   return (
     <main className="lds-map">
       <Map
@@ -24,7 +28,7 @@ export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, sh
         <NodeLayer lanes={lanes} showLabels={showLabels} />
         {showCog && <CogMarker cogResult={cogResult} />}
       </Map>
-
+      <ParseFeedback warnings={parseWarnings} errors={parseErrors} />
       {!hasData && (
         <div className="lds-empty-state">
           <LogoMark size={36} />
@@ -33,5 +37,50 @@ export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, sh
         </div>
       )}
     </main>
+  )
+}
+function ParseFeedback({ warnings, errors }) {
+  if (warnings.length === 0 && errors.length === 0) return null
+
+  return (
+    <div style={{
+      position:   'absolute',
+      top:        12,
+      left:       '50%',
+      transform:  'translateX(-50%)',
+      zIndex:     1000,
+      display:    'flex',
+      flexDirection: 'column',
+      gap:        6,
+      maxWidth:   500,
+      width:      '90%',
+    }}>
+      {errors.map((e, i) => (
+        <div key={i} style={{
+          background:    'rgba(224,92,92,0.15)',
+          border:        '1px solid rgba(224,92,92,0.4)',
+          padding:       '8px 14px',
+          fontFamily:    "'JetBrains Mono', monospace",
+          fontSize:      10,
+          color:         '#e05c5c',
+          letterSpacing: '.03em',
+        }}>
+          ✕ {e}
+        </div>
+      ))}
+      {warnings.map((w, i) => (
+        <div key={i} style={{
+          background:    'rgba(200,154,62,0.1)',
+          border:        '1px solid rgba(200,154,62,0.3)',
+          padding:       '8px 14px',
+          fontFamily:    "'JetBrains Mono', monospace",
+          fontSize:      10,
+          color:         '#c89a3e',
+          letterSpacing: '.03em',
+        }}>
+          ⚠ {w}
+        </div>
+      ))}
+    </div>
   )
 }

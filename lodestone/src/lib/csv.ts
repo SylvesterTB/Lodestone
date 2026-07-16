@@ -108,7 +108,6 @@ export interface ParsedShipment {
       Object.entries(matchResults).map(([field, result]) => [field, result.header])
     ) as Record<keyof ParsedShipment, string | null>;
 
-  console.log("Calculated Header Map:", headerMap);
 
   // if any required headers are missing, abort early to avoid indexing with null
   if (errors.length > 0) {

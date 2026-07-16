@@ -82,6 +82,25 @@ export default function Sidebar({
               or click to browse<br />
               origin · dest · lat/lon · vol · cost
             </div>
+            <div
+              style={{
+                marginTop:     10,
+                fontSize:      10,
+                color:         '#c89a3e',
+                cursor:        'pointer',
+                letterSpacing: '.04em',
+                textDecoration: 'underline',
+              }}
+              onClick={async (e) => {
+                e.stopPropagation()
+                const res  = await fetch('/sample_network.csv')
+                const text = await res.text()
+                const file = new File([text], 'sample_network.csv', { type: 'text/csv' })
+                onFileLoad(file)
+              }}
+            >
+              or load sample data
+            </div>
           </div>
         )}
       </div>

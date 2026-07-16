@@ -108,6 +108,8 @@ export default function App() {
       showLabels={showLabels}
       cogResult={cogResult}
       showCog={showCog}
+      parseWarnings={parseWarnings}
+      parseErrors={parseErrors}
     />
 
       <MetricsPanel
