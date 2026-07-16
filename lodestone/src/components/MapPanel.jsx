@@ -4,9 +4,11 @@ import LogoMark from './LogoMark'
 import { lodestoneMapStyle } from '../lib/mapStyle'
 import LaneLayer from './LaneLayer'
 import NodeLayer from './NodeLayer'
+import CogMarker from './CogMarker'
 
 
-export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, showLabels }) {
+
+export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, showLabels, cogResult, showCog  }) {
   return (
     <main className="lds-map">
       <Map
@@ -20,6 +22,7 @@ export default function MapPanel({ hasData, lanes, scaleWidth, highlightUtil, sh
       >
         <LaneLayer lanes={lanes} scaleWidth={scaleWidth} highlightUtil={highlightUtil} />
         <NodeLayer lanes={lanes} showLabels={showLabels} />
+        {showCog && <CogMarker cogResult={cogResult} />}
       </Map>
 
       {!hasData && (

@@ -37,7 +37,7 @@ export default function NodeLayer({ lanes, showLabels }) {
         >
         <div
             style={{ position: 'relative', cursor: 'pointer' }}
-            onClick={(e) => {
+            onMouseOver={(e) => {
             e.stopPropagation()
             setSelectedNode(node)
             }}

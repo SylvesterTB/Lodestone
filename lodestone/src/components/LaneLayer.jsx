@@ -70,6 +70,22 @@ export default function LaneLayer({ lanes, scaleWidth, highlightUtil }) {
         }}
         layout={{ 'line-cap': 'round', 'line-join': 'round' }}
     />
+    <Layer
+      id="lane-arrows"
+      type="symbol"
+      layout={{
+        'symbol-placement': 'line',
+        'symbol-spacing':   80,
+        'text-field':       '▶',
+        'text-size':        10,
+        'text-rotation-alignment': 'map',
+        'text-keep-upright': false,
+      }}
+      paint={{
+        'text-color':   '#2ec4b6',
+        'text-opacity': 1,
+      }}
+    />
     </Source>
   )
 }
