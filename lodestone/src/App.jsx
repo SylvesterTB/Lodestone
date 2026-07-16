@@ -45,7 +45,10 @@ export default function App() {
   //   const lanes     = useFilteredLanes(); // sorted by totalCost desc
   const lanes   = useMemo(() => selectFilteredLanes(shipments, minVol), [shipments, minVol])
   const metrics = useMemo(() => selectNetworkMetrics(shipments, minVol), [shipments, minVol])
-  const cogResult = useLodestoneStore(selectCogResult);
+  const cogResult = useMemo(
+    () => selectCogResult(shipments, minVol, weightByCost),
+    [shipments, minVol, weightByCost]
+  )
   const cogIters  = cogResult?.iters ?? null;
 
   const hasData = filename !== null;

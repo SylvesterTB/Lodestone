@@ -1,6 +1,7 @@
 import { LodestoneStore } from './useStore'
 import { AggregatedLane, NetworkMetrics } from '../types'
 import { ParsedShipment } from '../lib/csv';
+import { computeCog } from '../lib/cog'
 
 
 export function selectFilteredLanes(shipments: ParsedShipment[], minVol: number): AggregatedLane[] {
@@ -68,6 +69,11 @@ export function selectNetworkMetrics(shipments: ParsedShipment[], minVol: number
 }
 
 
-export function selectCogResult(s: LodestoneStore) {
-  return null; // stub until cog.ts is built
-}
+  export function selectCogResult(
+    shipments:    ParsedShipment[],
+    minVol:       number,
+    weightByCost: boolean
+  ) {
+    const filtered = shipments.filter(row => row.volume >= minVol)
+    return computeCog(filtered, weightByCost)
+  }
