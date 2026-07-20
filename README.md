@@ -1,120 +1,42 @@
 # Lodestone
 
-Supply chain network analysis — no account, no install, no Excel. Upload shipment CSVs, visualize lane flows on a map, compute center-of-gravity warehouse placement.
+**Free, web-native supply chain network analysis.**
+
+Upload a CSV of shipment data, visualize lane flows on an interactive map, and compute center-of-gravity warehouse placement — no account, no install, no Excel.
+
+**[Try it live →](https://d1jktqgh1yf85o.cloudfront.net)**
 
 ---
 
-## Quick start
+## Features
 
-```bash
-npm create vite@latest lodestone -- --template react
-cd lodestone && npm install
-npm install zustand papaparse react-leaflet leaflet
-npm run dev
-```
-
-Copy the files in `src/` from this repo into your Vite project. Import `lodestone.css` in `App.jsx`.
+- **CSV upload** with fuzzy column name matching — works with real-world exports from any TMS or ERP
+- **Lane visualization** on a dark cartographic map, with stroke width scaled to volume and directional arrows
+- **Center of gravity** analysis using the Weiszfeld algorithm, weighted by cost or volume
+- **Metrics panel** with lane count, node count, total cost, volume, and per-lane utilization
+- **Non-destructive filters** — changing mode or adjusting filters never wipes your loaded data
+- **No account required** — everything runs in your browser, nothing is stored server-side
 
 ---
 
-## File structure
+## Stack
 
-```
-src/
-  App.jsx                    # Root layout + placeholder state (migrate to Zustand)
-  styles/
-    lodestone.css            # All design tokens and component CSS
-  components/
-    LogoMark.jsx             # Compass SVG — used in Header and MapPanel
-    Header.jsx               # Top bar: branding, file badge, upload button
-    Sidebar.jsx              # Upload zone, mode toggle, filters, CoG settings
-    MapPanel.jsx             # Wrapper shell — drop <MapContainer> in as children
-    MetricsPanel.jsx         # Stat cards, CoG result card, lane list
-  store/
-    useStore.ts              # (you build) Zustand store
-    selectors.ts             # (you build) derived data
-  lib/
-    csv.ts                   # (you build) PapaParse + column normalization
-    cog.ts                   # (you build) Weiszfeld algorithm
-    metrics.ts               # (you build) cost and utilization calculations
-```
+| Layer | Choice |
+|---|---|
+| Frontend | React 18 + TypeScript + Vite |
+| Map | MapLibre GL JS + react-map-gl + OpenFreeMap tiles |
+| CSV parsing | PapaParse + Fuse.js |
+| State | Zustand |
+| Deploy | S3 + CloudFront |
+| CI/CD | GitHub Actions |
 
 ---
 
-## Architecture
+## CSV Format
 
-State has three layers. Keeping them separate is what makes filters non-destructive — changing a filter never touches raw data, and switching view modes never resets filters.
+Column names are fuzzy-matched on upload — `FROM_LAT`, `ship_from_lat`, and `origin_lat` all resolve correctly.
 
-```ts
-// store/useStore.ts
-rawData:     ParsedShipment[]   // set once on upload, never mutated
-filterState: FilterState        // always reversible
-viewState:   ViewState          // which visualization is active
-```
-
-Derived values (filtered lanes, metrics, CoG result) live in `selectors.ts` as pure functions of those three layers. Nothing imperative, no re-fetches.
-
-```ts
-// store/selectors.ts
-export const filteredLanes = (s: Store) =>
-  s.rawData.filter(row => row.volume >= s.filterState.minVol);
-
-export const cogResult = (s: Store) =>
-  weiszfeld(filteredLanes(s), s.filterState.weightByCost);
-```
-
-`App.jsx` currently holds everything in `useState`. The comments there show exactly what to swap out once your store is ready.
-
----
-
-## Component props
-
-### `<Header>`
-| Prop | Type | Description |
-|---|---|---|
-| `filename` | `string \| null` | Loaded file name; null renders "No data loaded" |
-| `onUploadClick` | `() => void` | Opens the hidden file input |
-
-### `<Sidebar>`
-| Prop | Type | Description |
-|---|---|---|
-| `hasData` | `boolean` | Switches between upload zone and loaded-file row |
-| `filename` | `string` | |
-| `rowCount` | `number` | |
-| `mode` | `'lanes' \| 'cog' \| 'both'` | |
-| `onModeChange` | `(m: string) => void` | |
-| `minVol` | `number` | |
-| `onMinVolChange` | `(v: number) => void` | |
-| `scaleWidth` | `boolean` | Scale lane stroke to volume |
-| `showLabels` | `boolean` | Node label visibility |
-| `highlightUtil` | `boolean` | Color high-utilization lanes red |
-| `weightByCost` | `boolean` | CoG: weight by cost vs volume |
-| `useWeiszfeld` | `boolean` | CoG: Weiszfeld vs simple centroid |
-| `cogIters` | `number \| null` | Displayed once CoG has converged |
-| `onFileLoad` | `(file: File) => void` | |
-| `onFileClear` | `() => void` | |
-
-### `<MapPanel>`
-| Prop | Type | Description |
-|---|---|---|
-| `hasData` | `boolean` | Shows/hides the empty-state overlay |
-| `children` | `ReactNode` | Your `<MapContainer>` from react-leaflet |
-
-### `<MetricsPanel>`
-| Prop | Type | Description |
-|---|---|---|
-| `metrics` | `NetworkMetrics \| null` | `{ laneCount, nodeCount, totalCost, totalVol }` |
-| `cogResult` | `CogResult \| null` | `{ lat, lon, nearestCity, iters }` |
-| `lanes` | `AggregatedLane[]` | Pre-sorted by `totalCost` desc — `{ originLabel, destLabel, totalCost, totalVol, relativeVol }` |
-| `showCog` | `boolean` | Controls CoG card visibility |
-
----
-
-## CSV format
-
-Column names are fuzzy-matched, so `ship_from_lat` and `FROM_LAT` both resolve.
-
-| Canonical name | Required | Common aliases |
+| Field | Required | Common aliases |
 |---|---|---|
 | `origin_lat` | ✓ | from_lat, ship_from_lat |
 | `origin_lon` | ✓ | from_lon, ship_from_lon |
@@ -122,25 +44,62 @@ Column names are fuzzy-matched, so `ship_from_lat` and `FROM_LAT` both resolve.
 | `dest_lon` | ✓ | to_lon, destination_lon |
 | `volume` | ✓ | qty, units, quantity |
 | `cost` | ✓ | freight_cost, total_cost |
-| `origin_label` | — | from_city, ship_from |
+| `origin_label` | — | from_city, ship_from, origin |
 | `dest_label` | — | to_city, destination |
 
-V1 requires lat/lon. Geocoding city/state strings is V2.
+A sample dataset is available in the app via "load sample data."
+
+---
+
+## Local Development
+
+```bash
+git clone https://github.com/SylvesterTB/Lodestone
+cd Lodestone/lodestone
+npm install
+npm run dev
+```
+
+Runs at `http://localhost:5173`. No environment variables required.
+
+```bash
+npm test          # watch mode
+npm run test:run  # single pass
+npm run build     # production build
+```
+
+---
+
+## Project Structure
+
+```
+src/
+  components/
+    Header.jsx
+    Sidebar.jsx
+    MapPanel.jsx
+    LaneLayer.jsx
+    NodeLayer.jsx
+    CogMarker.jsx
+    MetricsPanel.jsx
+    LogoMark.jsx
+  store/
+    useStore.ts       # Zustand store (rawData / filterState / viewState)
+    selectors.ts      # filteredLanes, networkMetrics, cogResult
+  lib/
+    csv.ts            # PapaParse + fuzzy column normalization
+    cog.ts            # Weiszfeld algorithm
+    mapStyle.ts       # MapLibre dark cartographic style
+  types.ts
+  App.jsx
+```
 
 ---
 
 ## Roadmap
 
-**V1**
-- [ ] `lib/csv.ts` — PapaParse + fuzzy column normalization
-- [ ] `store/useStore.ts` — Zustand store (rawData / filterState / viewState)
-- [ ] `store/selectors.ts` — filteredLanes, metrics, cogResult
-- [ ] Leaflet map with lane polylines and node markers
-- [ ] `lib/cog.ts` — Weiszfeld algorithm
-- [ ] `lib/metrics.ts` — cost and utilization rollups
-- [ ] Deploy to S3 + CloudFront via GitHub Actions
-
-**V2**
-- [ ] Geocoding via Lambda + Nominatim
-- [ ] CSV export (CoG result, filtered lanes)
-- [ ] Multi-scenario comparison
+- Geocoding via Lambda + Nominatim (city/state → lat/lon inputs)
+- Vehicle capacity selector for true utilization calculation
+- CSV export of CoG result and filtered lanes
+- Multi-scenario comparison
+- Parse report modal showing column mappings and dropped rows
