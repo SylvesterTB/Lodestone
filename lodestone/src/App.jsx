@@ -58,6 +58,7 @@ export default function App() {
   async function handleFileLoad(file) {
     const text = await file.text()
     const result = parseAndNormalizeCSV(text)
+    warnings.push("Some rows were missing coordinates — geocoding all locations")
     loadFile(file.name, result)
   }
 

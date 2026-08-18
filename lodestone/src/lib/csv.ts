@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
-import Fuse from 'fuse.js'
+import Fuse from 'fuse.js';
+
 
 
 export interface ParsedShipment {
@@ -18,12 +19,12 @@ export interface ParsedShipment {
     errors: string[];
   }
 
-  export function parseAndNormalizeCSV(csvContent: string): ParseResult {
-  const parsed = Papa.parse<Record<string, string>>(csvContent, {
-    header: true, 
-    skipEmptyLines: true
-  });
-
+  export async function parseAndNormalizeCSV(csvContent: string): Promise<ParseResult> {
+    const parsed = Papa.parse<Record<string, string>>(csvContent, {
+      header: true, 
+      skipEmptyLines: true
+    });
+  
   const rawRows = parsed.data;
   
   // make them lowercase to fix matching
@@ -128,6 +129,46 @@ export interface ParsedShipment {
       dest_label: row[headerMapNonNull.dest_label] || 'Unknown'
     };
   });
+
+  const needsGeocode = cleanShipments.some(
+    s => isNaN(s.origin_lat) || isNaN(s.origin_lon) ||
+        isNaN(s.dest_lat)   || isNaN(s.dest_lon)
+  )
+
+  if (needsGeocode) {
+    warnings.push("Some rows were missing coordinates — geocoding all locations")
+
+    // collect unique location strings
+    const uniqueLocations = new Set<string>()
+    rawRows.forEach(row => {
+      const originLoc = row[headerMapNonNull.origin_label]
+      const destLoc   = row[headerMapNonNull.dest_label]
+      if (originLoc) uniqueLocations.add(originLoc.trim())
+      if (destLoc)   uniqueLocations.add(destLoc.trim())
+    })
+
+    // call API from aws
+    const res     = await fetch(import.meta.env.VITE_GEOCODING_API, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ locations: [...uniqueLocations] })
+    })
+    const geoData = await res.json() as Record<string, { lat: number, lon: number }>
+
+    // fill in coordinates on every shipment that were got by geocode 
+    cleanShipments.forEach((s, i) => {
+      const originLoc = rawRows[i][headerMapNonNull.origin_label]?.trim()
+      const destLoc   = rawRows[i][headerMapNonNull.dest_label]?.trim()
+      if (originLoc && geoData[originLoc]) {
+        s.origin_lat = geoData[originLoc].lat
+        s.origin_lon = geoData[originLoc].lon
+      }
+      if (destLoc && geoData[destLoc]) {
+        s.dest_lat = geoData[destLoc].lat
+        s.dest_lon = geoData[destLoc].lon
+      }
+    })
+  }
   const validShipments = cleanShipments.filter(s => {
     const coordsValid  = isFinite(s.origin_lat) && s.origin_lat !== 0 &&
                         isFinite(s.origin_lon) && s.origin_lon !== 0 &&
@@ -138,4 +179,18 @@ export interface ParsedShipment {
   });
 
   return { shipments: validShipments, warnings, errors };
+}
+export interface GeocodingNeeded {
+  rowsNeedingGeocode: Array<{
+    index: number
+    locationString: string
+  }>
+  partialShipments: Array<Omit<ParsedShipment, 'origin_lat' | 'origin_lon' | 'dest_lat' | 'dest_lon'> & {
+    origin_lat?: number
+    origin_lon?: number
+    dest_lat?:   number
+    dest_lon?:   number
+    origin_location?: string
+    dest_location?:   string
+  }>
 }
