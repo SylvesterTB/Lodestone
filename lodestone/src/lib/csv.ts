@@ -71,7 +71,7 @@ export interface ParsedShipment {
     if (REQUIRED.includes(canonicalTarget)) {
     for (const alias of targets) {
       const results = fuse.search(alias);
-      if (results.length > 0 && results[0].score !== undefined && results[0].score < 0.2) {
+      if (results.length > 0 && results[0].score !== undefined && results[0].score < 0.1) {
         const original = rawHeaders.find(h => h.toLowerCase().trim() === results[0].item)!;
         return { status: 'fuzzy', header: original, inferredFrom: results[0].item };
       }
@@ -155,13 +155,15 @@ export interface ParsedShipment {
 
     // collect unique location strings
     const uniqueLocations = new Set<string>()
+    const originHeader = headerMap.origin_label
+    const destHeader   = headerMap.dest_label
+
     rawRows.forEach(row => {
-      const originLoc = row[headerMapNonNull.origin_label]
-      const destLoc   = row[headerMapNonNull.dest_label]
+      const originLoc = originHeader ? row[originHeader] : undefined
+      const destLoc   = destHeader   ? row[destHeader]   : undefined
       if (originLoc) uniqueLocations.add(originLoc.trim())
       if (destLoc)   uniqueLocations.add(destLoc.trim())
     })
-
     // call API from aws
     const res     = await fetch(import.meta.env.VITE_GEOCODING_API, {
       method:  "POST",
@@ -172,8 +174,8 @@ export interface ParsedShipment {
 
     // fill in coordinates on every shipment that were got by geocode 
     cleanShipments.forEach((s, i) => {
-      const originLoc = rawRows[i][headerMapNonNull.origin_label]?.trim()
-      const destLoc   = rawRows[i][headerMapNonNull.dest_label]?.trim()
+      const originLoc = originHeader ? rawRows[i][originHeader]?.trim() : undefined
+      const destLoc   = destHeader   ? rawRows[i][destHeader]?.trim()   : undefined
       if (originLoc && geoData[originLoc]) {
         s.origin_lat = geoData[originLoc].lat
         s.origin_lon = geoData[originLoc].lon
@@ -194,18 +196,4 @@ export interface ParsedShipment {
   });
 
   return { shipments: validShipments, warnings, errors };
-}
-export interface GeocodingNeeded {
-  rowsNeedingGeocode: Array<{
-    index: number
-    locationString: string
-  }>
-  partialShipments: Array<Omit<ParsedShipment, 'origin_lat' | 'origin_lon' | 'dest_lat' | 'dest_lon'> & {
-    origin_lat?: number
-    origin_lon?: number
-    dest_lat?:   number
-    dest_lon?:   number
-    origin_location?: string
-    dest_location?:   string
-  }>
 }
