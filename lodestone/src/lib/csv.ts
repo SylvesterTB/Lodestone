@@ -39,8 +39,8 @@ export interface ParsedShipment {
     dest_lon: ['to_lon', 'destination_lon', 'destination_longitude', 'dest_lon'],
     volume: ['qty', 'quantity', 'volume', 'shipments', 'units'],
     cost: ['freight_cost', 'cost', 'price', 'total_cost'],
-    origin_label: ['ship_from', 'origin_label', 'from_city', 'origin'],
-    dest_label: ['destination', 'dest_label', 'to_city', 'to_label']
+    origin_label: ['ship_from', 'origin_label', 'from_city', 'origin', 'origin_city', 'from', 'source', 'source_city'],
+    dest_label: ['destination', 'dest_label', 'to_city', 'to_label', 'dest_city', 'to', 'destination_city'],
   };
   const options = {
     threshold: .25,
@@ -53,6 +53,7 @@ export interface ParsedShipment {
     | { status: 'exact';  header: string }
     | { status: 'fuzzy';  header: string; inferredFrom: string }
     | { status: 'missing'; header: null }
+    
   const REQUIRED: (keyof ParsedShipment)[] = 
     ['origin_lat', 'origin_lon', 'dest_lat', 'dest_lon', 'volume', 'cost'];
 
@@ -94,7 +95,18 @@ export interface ParsedShipment {
       origin_label:  findBestHeader('origin_label'),
       dest_label:    findBestHeader('dest_label'),
     };
+    const hasCoordinates = matchResults.origin_lat.status !== 'missing' &&
+                       matchResults.origin_lon.status !== 'missing' &&
+                       matchResults.dest_lat.status   !== 'missing' &&
+                       matchResults.dest_lon.status   !== 'missing'
 
+    const hasLocationStrings = matchResults.origin_label.status !== 'missing' &&
+                              matchResults.dest_label.status   !== 'missing'
+
+    if (!hasCoordinates && !hasLocationStrings) {
+      errors.push("No coordinates or location columns found — add lat/lon columns or city name columns")
+      return { shipments: [], warnings, errors }
+    }
     // walk the results and collect messages
     for (const [field, result] of Object.entries(matchResults) as [keyof ParsedShipment, MatchResult][]) {
       if (result.status === 'fuzzy') {
