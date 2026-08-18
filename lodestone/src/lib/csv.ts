@@ -112,7 +112,11 @@ export interface ParsedShipment {
       if (result.status === 'fuzzy') {
         warnings.push(`"${result.inferredFrom}" was mapped to ${field} — verify this is correct`);
       }
-      if (result.status === 'missing' && REQUIRED.includes(field)) {
+      
+      const isCoordField = (['origin_lat', 'origin_lon', 'dest_lat', 'dest_lon'] as (keyof ParsedShipment)[]).includes(field)
+      
+      // don't flag coordinate fields as errors if we have location strings for geocoding
+      if (result.status === 'missing' && REQUIRED.includes(field) && !(isCoordField && hasLocationStrings)) {
         errors.push(`No column found for "${field}" — try renaming it to "${explicitDictionary[field][0]}"`);
       }
     }
